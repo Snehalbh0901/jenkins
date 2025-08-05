@@ -1,0 +1,31 @@
+pipeline {
+    agent any
+
+    environment {
+        EC2_HOST = 'ec2-user@3.80.194.17' 
+        SSH_KEY = credentials('3.80.194.17') // Add your SSH private key in Jenkins credentials
+    }
+
+    stages {
+        stage('Check Jenkins on EC2') {
+            steps {
+                script {
+                    echo "Checking if Jenkins is installed on ${EC2_HOST}..."
+
+                    def result = sh(
+                        script: """
+                            ssh -o StrictHostKeyChecking=no -i ${SSH_KEY} ${EC2_HOST} 'which jenkins || which java && systemctl status jenkins'
+                        """,
+                        returnStatus: true
+                    )
+
+                    if (result == 0) {
+                        echo "✅ Jenkins is installed and/or running on EC2."
+                    } else {
+                        echo "❌ Jenkins is NOT installed or NOT running on EC2."
+                    }
+                }
+            }
+        }
+    }
+}
