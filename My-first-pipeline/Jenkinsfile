@@ -8,15 +8,13 @@ pipeline {
     stages {
         stage('Check Jenkins on EC2') {
             steps {
-                // Correct way to use SSH credentials in a pipeline
                 withCredentials([sshUserPrivateKey(credentialsId: '3.80.194.17', keyFileVariable: 'SSH_KEY_FILE')]) {
                     script {
                         echo "🔍 Checking if Jenkins is installed on ${EC2_HOST}..."
 
+                        // Use a single-quoted script block to avoid Groovy interpolation
                         def result = sh(
-                            script: """
-                                ssh -o StrictHostKeyChecking=no -i "$SSH_KEY_FILE" $EC2_HOST 'which jenkins || which java && systemctl status jenkins'
-                            """,
+                            script: 'ssh -o StrictHostKeyChecking=no -i $SSH_KEY_FILE $EC2_HOST \'which jenkins || which java && systemctl status jenkins\'',
                             returnStatus: true
                         )
 
